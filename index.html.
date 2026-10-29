@@ -1,0 +1,386 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>نظام البيجر الرقمي للمطاعم - Digital Bistro Pager</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Font (Tajawal & Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            900: '#78350f',
+                        },
+                        darkBg: '#121212',
+                        cardBg: '#1e1e1e',
+                        accentGreen: '#10b981',
+                        accentGold: '#fbbf24',
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'ping-once': 'ping 1s cubic-bezier(0, 0, 0.2, 1) 3',
+                        'glow': 'glowRing 2s infinite alternate',
+                    },
+                    keyframes: {
+                        glowRing: {
+                            '0%': { boxShadow: '0 0 15px rgba(251, 191, 36, 0.2)' },
+                            '100%': { boxShadow: '0 0 35px rgba(251, 191, 36, 0.8)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #0d0d0d;
+            color: #f3f4f6;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(30, 30, 30, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Pulsing Glow Effect for Ready Status */
+        .ready-glow {
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
+            animation: pulseGlow 1.2s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); transform: scale(1); }
+            to { box-shadow: 0 0 50px rgba(16, 185, 129, 0.8); transform: scale(1.02); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center antialiased pb-10">
+
+    <!-- Top Mode Switcher Navigation -->
+    <header class="w-full max-w-md bg-stone-900/90 border-b border-stone-800 p-3 sticky top-0 z-50 backdrop-blur-md shadow-lg">
+        <div class="flex justify-between items-center gap-2">
+            <button id="btnCustomerView" onclick="switchView('customer')" class="flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-mobile-screen"></i>
+                <span>شاشة الزبون</span>
+            </button>
+            <button id="btnKitchenView" onclick="switchView('kitchen')" class="flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 bg-stone-800 text-stone-400 hover:text-white">
+                <i class="fa-solid fa-utensils"></i>
+                <span>لوحة المطبخ</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-md px-4 pt-6 flex-1 flex flex-col justify-center items-center">
+
+        <!-- ========================================== -->
+        <!-- 1. CUSTOMER VIEW (البيجر الرقمي للزبون) -->
+        <!-- ========================================== -->
+        <div id="customerView" class="w-full flex flex-col items-center justify-center gap-6">
+
+            <!-- Restaurant Brand Header -->
+            <div class="text-center space-y-1">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-stone-950 font-black text-xl mb-1 shadow-md">
+                    B
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-wide text-white">Bistro Bella</h1>
+                <p class="text-xs text-stone-400 flex items-center justify-center gap-1">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    نظام التنبيه والبيجر الذكي
+                </p>
+            </div>
+
+            <!-- Order Select Box (For Testing/Demo Purpose) -->
+            <div class="w-full glass-card p-3 rounded-2xl flex items-center justify-between text-xs text-stone-300">
+                <label for="customerOrderSelect" class="font-medium flex items-center gap-1.5">
+                    <i class="fa-solid fa-ticket text-amber-400"></i>
+                    اختر رقم طلبك للتتبع:
+                </label>
+                <select id="customerOrderSelect" onchange="trackOrder(this.value)" class="bg-stone-800 text-amber-400 font-bold border border-stone-700 rounded-lg px-2 py-1 outline-none focus:border-amber-500">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Big Pager Circle Card -->
+            <div id="pagerCard" class="w-full glass-card rounded-3xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-500">
+                
+                <!-- Status Badge -->
+                <div id="statusBadge" class="mb-4 px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <i class="fa-solid fa-hourglass-half animate-spin"></i>
+                    <span id="statusText">جاري تحضير طلبك...</span>
+                </div>
+
+                <!-- Circular Order Display -->
+                <div id="circleRing" class="w-48 h-48 sm:w-56 sm:h-56 rounded-full border-4 border-amber-500/30 flex flex-col items-center justify-center relative my-2 transition-all duration-500 bg-stone-900/80 shadow-2xl">
+                    <span class="text-xs text-stone-400 font-medium uppercase tracking-wider mb-1">رقم الطلب</span>
+                    <span id="displayOrderNum" class="text-6xl sm:text-7xl font-black text-amber-400 tracking-tight">12</span>
+                    
+                    <span id="tableNumBadge" class="mt-2 text-xs font-bold bg-stone-800 text-stone-300 px-3 py-1 rounded-full border border-stone-700">
+                        الطاولة: #04
+                    </span>
+                </div>
+
+                <!-- Ready Animation Alert Box (Hidden Initially) -->
+                <div id="readyAlertBox" class="hidden my-3 w-full bg-emerald-500/20 border border-emerald-500/40 rounded-2xl p-3 animate-bounce">
+                    <p class="text-emerald-400 font-extrabold text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        وجبتك جاهزة! يرجى الإستلام الآن
+                    </p>
+                </div>
+
+                <!-- Instruction Info -->
+                <p id="instructionText" class="text-xs text-stone-400 mt-2 max-w-xs leading-relaxed">
+                    يرجى الإنتظار في مكانك. سيرن هاتفك ويتهز فور إكتمال تحضير وجبتك بالمطبخ.
+                </p>
+
+                <!-- Audio Test Button -->
+                <button onclick="triggerNotificationSound()" class="mt-4 text-[10px] text-stone-500 hover:text-amber-400 underline flex items-center gap-1">
+                    <i class="fa-solid fa-volume-high"></i>
+                    اختبار صوت التنبيه
+                </button>
+            </div>
+
+            <!-- Receipt & Additional Details -->
+            <div class="w-full glass-card p-4 rounded-2xl space-y-2 text-xs">
+                <div class="flex justify-between items-center text-stone-400">
+                    <span>الوقت المتبقي التقديري:</span>
+                    <span id="estimatedTime" class="font-bold text-amber-400">حوالي 10 دقائق</span>
+                </div>
+                <div class="flex justify-between items-center text-stone-400 pt-2 border-t border-stone-800">
+                    <span>حالة الإشعارات:</span>
+                    <span class="text-emerald-400 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> مفعّلة على الجوال
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 2. KITCHEN DASHBOARD (لوحة تحكم المطبخ) -->
+        <!-- ========================================== -->
+        <div id="kitchenView" class="w-full flex-col gap-5 hidden">
+            
+            <!-- Dashboard Title & Add Order -->
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-kitchen-set text-amber-400"></i>
+                        إدارة طلبات المطبخ
+                    </h2>
+                    <p class="text-xs text-stone-400">تحكم بحالة الوجبات وإرسال التنبيهات للزبائن</p>
+                </div>
+                <button onclick="openNewOrderModal()" class="bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all">
+                    <i class="fa-solid fa-plus"></i>
+                    طلب جديد
+                </button>
+            </div>
+
+            <!-- Orders Summary Cards -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass-card p-3 rounded-2xl border-r-4 border-r-amber-500 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-stone-400 font-medium">قيد التحضير</p>
+                        <p id="countPreparing" class="text-2xl font-black text-amber-400">0</p>
+                    </div>
+                    <i class="fa-solid fa-fire text-amber-500/30 text-2xl"></i>
+                </div>
+                <div class="glass-card p-3 rounded-2xl border-r-4 border-r-emerald-500 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-stone-400 font-medium">جاهزة للإستلام</p>
+                        <p id="countReady" class="text-2xl font-black text-emerald-400">0</p>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-emerald-500/30 text-2xl"></i>
+                </div>
+            </div>
+
+            <!-- Orders List Section -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-bold text-stone-300 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-stone-500"></i>
+                    قائمة الطلبات الحالية
+                </h3>
+
+                <!-- Orders Container -->
+                <div id="kitchenOrdersList" class="space-y-3 min-h-[200px]">
+                    <!-- Dynamic Orders Items Will Be Injected Here -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal for Adding New Order in Kitchen -->
+    <div id="addOrderModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-xs rounded-3xl p-6 space-y-4 border border-stone-700 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-white text-base">إضافة طلب جديد</h3>
+                <button onclick="closeNewOrderModal()" class="text-stone-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAddNewOrder(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-stone-400 mb-1">رقم الطلب (Order #)</label>
+                    <input type="number" id="inputOrderNum" required placeholder="مثال: 15" class="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-stone-400 mb-1">رقم الطاولة (Table #)</label>
+                    <input type="number" id="inputTableNum" required placeholder="مثال: 4" class="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-stone-400 mb-1">اسم الوجبة / الملاحظات</label>
+                    <input type="text" id="inputMealNote" placeholder="مثال: 2 برغر كلاسيك" class="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="pt-2 flex gap-2">
+                    <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold py-2.5 rounded-xl text-xs shadow-lg transition-all">
+                        حفظ وإضافة
+                    </button>
+                    <button type="button" onclick="closeNewOrderModal()" class="px-4 bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold py-2.5 rounded-xl text-xs">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast Message -->
+    <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-amber-500 text-stone-950 px-4 py-2 rounded-full font-bold text-xs shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toastMsg">تمت العملية بنجاح</span>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // ====================================================
+        // Global State & Mock Initial Data
+        // ====================================================
+        let orders = [
+            { id: 12, table: 4, meal: 'كبسة دجاج + مشروب', status: 'preparing', time: '12:30 PM' },
+            { id: 15, table: 2, meal: 'قطع لحم الواغيو', status: 'preparing', time: '12:35 PM' },
+            { id: 08, table: 7, meal: 'طبق ريزوتو', status: 'ready', time: '12:20 PM' }
+        ];
+
+        let currentActiveOrderNum = 12; // Default Order Tracked on Customer View
+        let audioContext = null;
+
+        // Initialize App on Page Load
+        window.onload = function () {
+            renderCustomerOrdersDropdown();
+            renderKitchenOrders();
+            trackOrder(currentActiveOrderNum);
+        };
+
+        // ====================================================
+        // View Switcher (Customer <-> Kitchen)
+        // ====================================================
+        function switchView(view) {
+            const customerView = document.getElementById('customerView');
+            const kitchenView = document.getElementById('kitchenView');
+            const btnCustomer = document.getElementById('btnCustomerView');
+            const btnKitchen = document.getElementById('btnKitchenView');
+
+            if (view === 'customer') {
+                customerView.classList.remove('hidden');
+                customerView.classList.add('flex');
+                kitchenView.classList.add('hidden');
+                kitchenView.classList.remove('flex');
+
+                btnCustomer.className = "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20";
+                btnKitchen.className = "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 bg-stone-800 text-stone-400 hover:text-white";
+            } else {
+                kitchenView.classList.remove('hidden');
+                kitchenView.classList.add('flex');
+                customerView.classList.add('hidden');
+                customerView.classList.remove('flex');
+
+                btnKitchen.className = "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20";
+                btnCustomer.className = "flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 bg-stone-800 text-stone-400 hover:text-white";
+            }
+        }
+
+        // ====================================================
+        // Customer Screen Functions
+        // ====================================================
+        function renderCustomerOrdersDropdown() {
+            const select = document.getElementById('customerOrderSelect');
+            select.innerHTML = '';
+            orders.forEach(order => {
+                const option = document.createElement('option');
+                option.value = order.id;
+                option.textContent = `طلب رقم #${order.id} (طاولة ${order.table})`;
+                if (order.id === currentActiveOrderNum) option.selected = true;
+                select.appendChild(option);
+            });
+        }
+
+        function trackOrder(orderId) {
+            currentActiveOrderNum = parseInt(orderId);
+            const order = orders.find(o => o.id === currentActiveOrderNum);
+
+            const displayOrderNum = document.getElementById('displayOrderNum');
+            const tableNumBadge = document.getElementById('tableNumBadge');
+            const statusText = document.getElementById('statusText');
+            const statusBadge = document.getElementById('statusBadge');
+            const circleRing = document.getElementById('circleRing');
+            const readyAlertBox = document.getElementById('readyAlertBox');
+            const pagerCard = document.getElementById('pagerCard');
+
+            if (!order) {
+                displayOrderNum.textContent = "--";
+                tableNumBadge.textContent = "غير متاح";
+                statusText.textContent = "الطلب غير موجود";
+                return;
+            }
+
+            displayOrderNum.textContent = order.id < 10 ? `0${order.id}` : order.id;
+            tableNumBadge.textContent = `الطاولة: #${order.table < 10 ? '0' + order.table : order.table}`;
+
+            if (order.status === 'ready') {
+                // Style for Ready Order
+                statusBadge.className = "mb-4 px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-pulse";
+            `
+
